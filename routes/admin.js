@@ -5,12 +5,14 @@ const adminHelpers = require('../helpers/admin-helpers');
 const { log } = require('handlebars');
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', (req, res)=> {
   console.log("hai");
   
   let adminUser = req.session.admin
+  console.log(adminUser);
+  
   if (adminUser) {
-    res.render('/',{admin:true})
+    res.render('admin/admin-dashboard',{admin:true,adminUser})
   } else {
     adminHelpers.findAdminCount().then((result) => {
       if (result.status > 0) {
@@ -40,6 +42,8 @@ router.get('/admin-login', (req, res) => {
 
 router.post('/admin-login', (req, res) => {
   adminHelpers.doLogin(req.body).then((response) => {
+    console.log(response);
+    
     if (response.status) {
       req.session.loggedIn = true
       req.session.admin = response.admin
