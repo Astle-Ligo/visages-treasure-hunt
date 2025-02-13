@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>{{title}}</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  {{#if admin}}
+  {{>admin-header}}
+  {{else}}
+  {{>user-header}}
+  {{/if}}
+  {{{body}}}
+  <footer>
+    <div class="footer">
+      <p>Made by <a href="">Astle</a></p>
+    </div>
+  </footer>
+</body>
+
+</html>
