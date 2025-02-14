@@ -1,0 +1,21 @@
+<section>
+    <div class="container-fluid pt-5">
+        <div class="edit-product m-4">
+            <div class="add-product mt-3">
+                <h2 class="text-center">EDIT CLUE</h2>
+                <form action="/admin/edit-clue/{{clue._id}}" method="post" enctype="multipart/form-data">
+                    <label for="">Clue Number</label>
+                    <input type="number" name="clueNumber" id="" class="form-control" value="{{clue.clueNumber}}">
+
+                    <label for="">Clue</label>
+                    <textarea name="clue" id="" class="form-control" rows="5">{{clue.clue}}</textarea>
+
+                    <label for="">Answer</label>
+                    <input type="text" name="answer" class="form-control" id="" value="{{clue.answer}}">
+
+                    <button class="btn btn-success mt-4" type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

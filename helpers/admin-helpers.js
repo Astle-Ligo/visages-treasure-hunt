@@ -56,4 +56,46 @@ module.exports = {
         })
     },
 
+    addClue: (clue, callback) => {
+        db.get().collection(collection.CLUE_COLLECTION).insertOne(clue).then((data) => {
+            callback(data.insertedId.toString())
+        })
+    },
+
+    getAllClues: () => {
+        return new Promise(async (resolve, reject) => {
+            let clues = await db.get().collection(collection.CLUE_COLLECTION).find().toArray()
+            resolve(clues)
+        })
+    },
+
+    getClueDetails: (clueId) => {
+        return new Promise((resolve, reject) => {
+            db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) }).then((clue) => {
+                resolve(clue)
+            })
+        })
+    },
+
+    updateClue: (clueId, clueDetails) => {
+        return new Promise((resolve, reject) => {
+            db.get().collection(collection.CLUE_COLLECTION).updateOne({ _id: new ObjectId(clueId) }, {
+                $set: {
+                    clueNumber: clueDetails.clueNumber,
+                    clue: clueDetails.clue,
+                    answer: clueDetails.answer
+                }
+            }).then((response) => {
+                resolve()
+            })
+        })
+    },
+
+    deleteClue: (clueId) => {
+        return new Promise((resolve, reject) => {
+            db.get().collection(collection.CLUE_COLLECTION).deleteOne({ _id: new ObjectId(clueId) }).then((response) => {
+                resolve(response)
+            })
+        })
+    },
 }

@@ -13,6 +13,8 @@ var db = require('./config/connection');
 
 const session = require('express-session')
 
+var fileUpload = require('express-fileupload')
+
 
 var app = express();
 
@@ -37,6 +39,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(fileUpload())
 
 app.use(session({secret:"Key",cookie:{maxAge:600000}}))
 

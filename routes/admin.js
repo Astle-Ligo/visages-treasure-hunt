@@ -7,14 +7,14 @@ const userHelpers = require('../helpers/user-helpers');
 const { log } = require('handlebars');
 
 /* GET home page. */
-router.get('/', (req, res)=> {
+router.get('/', (req, res) => {
   console.log("hai");
-  
+
   let adminUser = req.session.admin
   console.log(adminUser);
-  
+
   if (adminUser) {
-    res.render('admin/admin-dashboard',{admin:true,adminUser})
+    res.render('admin/admin-dashboard', { admin: true, adminUser })
   } else {
     adminHelpers.findAdminCount().then((result) => {
       if (result.status > 0) {
@@ -45,7 +45,7 @@ router.get('/admin-login', (req, res) => {
 router.post('/admin-login', (req, res) => {
   adminHelpers.doLogin(req.body).then((response) => {
     console.log(response);
-    
+
     if (response.status) {
       req.session.loggedIn = true
       req.session.admin = response.admin
@@ -64,7 +64,53 @@ router.get('/admin-log-out', (req, res) => {
 
 router.get('/clues', (req, res) => {
   let adminUser = req.session.admin
-  res.render('admin/clues', { admin: true, adminUser})
+  adminHelpers.getAllClues().then((clues) => {
+    console.log(clues);
+    res.render('admin/clues', { admin: true, adminUser,clues})
+  })
 })
+
+router.get('/users', (req, res) => {
+  let adminUser = req.session.admin
+  res.render('admin/user-data', { admin: true, adminUser })
+})
+
+
+router.get('/add-clue', (req, res) => {
+  let adminUser = req.session.admin
+  res.render('admin/add-clue', { admin: true, adminUser })
+})
+
+router.post('/add-clue', (req, res) => {
+  console.log(req.body);
+
+  let adminUser = req.session.admin
+  adminHelpers.addClue(req.body, (id) => {
+    res.render('admin/add-clue', { admin: true, adminUser })
+  })
+})
+
+router.get('/delete-clue/:id', (req, res) => {
+  let clueId = req.params.id
+  adminHelpers.deleteClue(clueId).then((response) => {
+    res.redirect('/admin/clues')
+  })
+})
+
+router.get('/edit-clue/:id', async (req, res) => {
+  let adminUser = req.session.admin
+  let clue = await adminHelpers.getClueDetails(req.params.id)
+  console.log(clue._id)
+  res.render('admin/edit-clue', { clue, admin: true, adminUser })
+})
+
+router.post('/edit-clue/:id', (req, res) => {
+  adminHelpers.updateClue(req.params.id, req.body).then(() => {
+    res.redirect('/admin/clues')
+  })
+})
+
+
+
 
 module.exports = router;
