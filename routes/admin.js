@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 
 const adminHelpers = require('../helpers/admin-helpers');
+const userHelpers = require('../helpers/user-helpers');
+
 const { log } = require('handlebars');
 
 /* GET home page. */
@@ -60,5 +62,9 @@ router.get('/admin-log-out', (req, res) => {
   res.redirect('/admin')
 })
 
+router.get('/clues', (req, res) => {
+  let adminUser = req.session.admin
+  res.render('admin/clues', { admin: true, adminUser})
+})
 
 module.exports = router;
