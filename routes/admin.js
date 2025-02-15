@@ -116,8 +116,9 @@ router.post('/edit-clue/:id', (req, res) => {
 // timer
 
 router.get("/game-settings", async (req, res) => {
+  let adminUser = req.session.admin
   const settings = await adminHelpers.getGameSettings();
-  res.render("admin/game-settings", { settings });
+  res.render("admin/game-settings", { settings, admin: true, adminUser });
 });
 
 router.post("/game-settings", async (req, res) => {
