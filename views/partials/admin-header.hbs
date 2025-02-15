@@ -25,21 +25,26 @@
                         <a class="nav-link" href="/admin/responses">Responses</a>
                     </li>
 
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/game-settings">Time Settings</a>
+                    </li>
+
                     <li>
                         <div class="dropdown">
                             <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 {{#if adminUser}}
                                 {{adminUser.Name}}
                                 {{else}}
                                 Admin Settings
                                 {{/if}}
                             </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="./admin-signup">Add New Admin</a>
-                                <a class="dropdown-item" href="./admin-log-out">Logout</a>
-                            </div>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="/admin/admin-signup">Add New Admin</a></li>
+                                <li><a class="dropdown-item" href="/admin/admin-log-out">Logout</a></li>
+                            </ul>
                         </div>
+
                     </li>
                 </ul>
             </div>

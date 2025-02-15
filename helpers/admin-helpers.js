@@ -98,4 +98,23 @@ module.exports = {
             })
         })
     },
+
+    getGameSettings: async () => {
+        return await db.get().collection(collection.GAME_SETTINGS_COLLECTION).findOne({});
+    },
+
+    setGameStartTime: async (gameStartTime) => {
+        await db.get().collection(collection.GAME_SETTINGS_COLLECTION).updateOne(
+            {},
+            { $set: { gameStartTime: new Date(gameStartTime) } },
+            { upsert: true }
+        );
+    },
+
+    getAllUsers: () => {
+        return new Promise(async (resolve, reject) => {
+            let users = await db.get().collection(collection.USER_COLLECTION).find().toArray()
+            resolve(users)
+        })
+    },
 }

@@ -66,13 +66,16 @@ router.get('/clues', (req, res) => {
   let adminUser = req.session.admin
   adminHelpers.getAllClues().then((clues) => {
     console.log(clues);
-    res.render('admin/clues', { admin: true, adminUser,clues})
+    res.render('admin/clues', { admin: true, adminUser, clues })
   })
 })
 
 router.get('/users', (req, res) => {
   let adminUser = req.session.admin
-  res.render('admin/user-data', { admin: true, adminUser })
+  adminHelpers.getAllUsers().then((users) => {
+    console.log(users);
+    res.render('admin/user-data', { admin: true, adminUser, users })
+  })
 })
 
 
@@ -109,6 +112,24 @@ router.post('/edit-clue/:id', (req, res) => {
     res.redirect('/admin/clues')
   })
 })
+
+// timer
+
+router.get("/game-settings", async (req, res) => {
+  const settings = await adminHelpers.getGameSettings();
+  res.render("admin/game-settings", { settings });
+});
+
+router.post("/game-settings", async (req, res) => {
+  try {
+    const { gameStartTime } = req.body;
+    await adminHelpers.setGameStartTime(gameStartTime);
+    res.redirect("/admin/game-settings");
+  } catch (error) {
+    console.error("Error setting game start time:", error);
+    res.status(500).send("Error saving game start time.");
+  }
+});
 
 
 

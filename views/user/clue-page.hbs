@@ -1,0 +1,45 @@
+<section>
+    <h2 id="clueTitle">Clue {{clue.clueNumber}}</h2>
+    <p id="clueText">{{clue.clue}}</p>
+
+    <input type="hidden" id="clueId" value="{{clue._id}}">
+    <input type="hidden" id="clueNumber" value="{{clue.clueNumber}}">
+    <input type="text" id="answerInput" class="form-control" placeholder="Enter your answer">
+    <button id="submitAnswer" class="btn btn-primary">Submit</button>
+    <p id="feedback" style="color: red;"></p>
+</section>
+
+<script>
+    document.getElementById("submitAnswer").addEventListener("click", async function () {
+        const clueId = document.getElementById("clueId").value;
+        const clueNumber = document.getElementById("clueNumber").value;
+        const userAnswer = document.getElementById("answerInput").value;
+
+        const response = await fetch("/submit-answer", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clueId, clueNumber, userAnswer })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (data.gameOver) {
+                document.getElementById("clueTitle").innerText = "🎉 Congratulations!";
+                document.getElementById("clueText").innerText = "You have completed the treasure hunt!";
+                document.getElementById("submitAnswer").remove();
+                document.getElementById("answerInput").remove();
+            } else {
+                // Update Clue Data Instead of Overwriting Page
+                document.getElementById("clueTitle").innerText = `Clue ${data.nextClue.clueNumber}`;
+                document.getElementById("clueText").innerText = data.nextClue.clue;
+                document.getElementById("clueId").value = data.nextClue._id;
+                document.getElementById("clueNumber").value = data.nextClue.clueNumber;
+                document.getElementById("answerInput").value = "";
+                document.getElementById("feedback").innerText = "";
+            }
+        } else {
+            document.getElementById("feedback").innerText = "Incorrect answer! Try again.";
+        }
+    });
+</script>
