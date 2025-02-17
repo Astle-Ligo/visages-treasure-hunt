@@ -24,41 +24,65 @@ module.exports = {
         return await db.get().collection(collection.GAME_SETTINGS_COLLECTION).findOne({});
     },
 
+    // Get the first clue
+    getFirstClue: async () => {
+        return await db.get().collection(collection.CLUE_COLLECTION).find().sort({ clueNumber: 1 }).limit(1).toArray();
+    },
+
     // Get Clue by ID
     getClue: async (clueId) => {
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: ObjectId(clueId) });
-        return clue;
+        try {
+            const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
+            return clue;
+        } catch (error) {
+            console.error("Error in getClue function:", error);
+            throw new Error("Failed to fetch clue");
+        }
     },
 
     // Check the answer to a clue
     checkClueAnswer: async (clueId, answer) => {
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: ObjectId(clueId) });
+        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
         if (!clue) return { error: "Clue not found" };
 
         if (clue.answer.toLowerCase() === answer.toLowerCase()) {
-            // Find next clue by clueNumber
-            const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: clue.clueNumber + 1 });
+            console.log("Answer is correct, moving to task page.");
 
-            return nextClue
-                ? { nextStep: `/task/${nextClue.taskPage}?clueId=${nextClue._id}` }
-                : { message: "Congratulations! You finished the game!" };
+            // Fetch task details (taskName, taskAnswer) from the clue
+            const taskName = clue.taskName;
+            const taskAnswer = clue.taskAnswer;
+
+            return {
+                nextStep: `/task/${taskName}/${clue._id}`,
+                taskName: taskName,
+                taskAnswer: taskAnswer
+            };
         } else {
             return { error: "Incorrect answer, try again!" };
         }
     },
 
-    // Check the answer to a task
+    // Check task answer and move to the next clue
     checkTaskAnswer: async (clueId, taskAnswer) => {
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: ObjectId(clueId) });
-        if (!clue) return { error: "Task not found" };
+        console.log("Checking task answer for clueId:", clueId); // Debugging log
+
+        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
+
+        // Ensure clue exists before proceeding
+        if (!clue) return { error: "Clue not found" };
 
         if (clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase()) {
-            // Find next clue automatically
-            const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: clue.clueNumber + 1 });
+            console.log("Task answer is correct, moving to next clue.");
 
-            return nextClue
-                ? { nextClue: `/clue/${nextClue._id}` }
-                : { message: "Congratulations! You completed the treasure hunt!" };
+            // Calculate next clue number
+            const nextClueNumber = (parseInt(clue.clueNumber) + 1).toString();
+            const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
+
+            if (nextClue) {
+                return { nextClue: `/clue/${nextClue._id}` };
+            } else {
+                return { celebration: true, message: "Congratulations! You completed the treasure hunt!" };
+            }
         } else {
             return { error: "Wrong task answer, try again!" };
         }

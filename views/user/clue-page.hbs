@@ -2,9 +2,13 @@
     <h2 id="clueTitle">Clue {{clue.clueNumber}}</h2>
     <p id="clueText">{{clue.clue}}</p>
 
-    <input type="hidden" id="clueId" value="{{clue._id}}">
-    <input type="hidden" id="clueNumber" value="{{clue.clueNumber}}">
-    <input type="text" id="answerInput" class="form-control" placeholder="Enter your answer">
-    <button id="submitAnswer" class="btn btn-primary">Submit</button>
+    <input type="hidden" id="clueId" name="clueId" value="{{clue._id}}">
+    <input type="hidden" id="clueNumber" name="clueNumber" value="{{clue.clueNumber}}">
+
+    <!-- Form for submitting the answer -->
+    <form action="/clue/{{clue._id}}" method="POST">
+        <input type="text" id="answerInput" name="answer" class="form-control" placeholder="Enter your answer" required>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
     <p id="feedback" style="color: red;"></p>
 </section>

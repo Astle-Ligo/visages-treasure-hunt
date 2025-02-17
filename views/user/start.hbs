@@ -3,7 +3,7 @@
     <p id="countdown"></p>
 
     <!-- Initially hidden, only shows when the timer ends -->
-    <a id="startGameLink" href="/clue/1" class="btn btn-success btn-lg" style="display: none;">
+    <a id="startGameLink" href="/clue/{{firstClue._id}}" class="btn btn-success btn-lg" style="display: none;">
         Start the Game
     </a>
 </section>
@@ -14,18 +14,15 @@
             const response = await fetch("/get-timer-status");
             const data = await response.json();
 
-            // If no game start time is set, show an error message
             if (!data.success || !data.startTime) {
                 document.getElementById("countdown").innerText = "No timer set.";
                 return;
             }
 
-            // Parse the start time from the server response
             const startTime = new Date(data.startTime).getTime();
             const countdownElement = document.getElementById("countdown");
             const startGameLink = document.getElementById("startGameLink");
 
-            // Set up the countdown interval
             const interval = setInterval(() => {
                 const now = new Date().getTime();
                 const timeLeft = startTime - now;
@@ -33,9 +30,8 @@
                 if (timeLeft <= 0) {
                     clearInterval(interval);
                     countdownElement.innerText = "Game is now live!";
-                    startGameLink.style.display = "inline-block"; // Show the start game link
+                    startGameLink.style.display = "inline-block";
                 } else {
-                    // Format the time remaining in hours, minutes, and seconds
                     const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
                     const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
                     const seconds = Math.floor((timeLeft / 1000) % 60);
