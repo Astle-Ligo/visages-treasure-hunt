@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userHelpers = require('../helpers/user-helpers');
 
-/* GET users listing. */
+// GET users listing
 router.get('/', (req, res) => {
     let user = req.session.user;
     if (user) {
@@ -12,6 +12,7 @@ router.get('/', (req, res) => {
     }
 });
 
+// User signup
 router.get('/user-signup', (req, res) => {
     res.render('user/user-signup');
 });
@@ -21,6 +22,7 @@ router.post('/user-signup', async (req, res) => {
     res.redirect('/');
 });
 
+// User login
 router.get('/user-login', (req, res) => {
     res.render('user/user-login', { user: true });
 });
@@ -36,43 +38,70 @@ router.post('/user-login', async (req, res) => {
     }
 });
 
+// User log out
 router.get('/user-log-out', (req, res) => {
     req.session.destroy();
     res.redirect('/user');
 });
 
-// 🔹 Fetch Game Start Timer from DB
+// Fetch Game Start Timer from DB
 router.get("/get-timer-status", async (req, res) => {
     try {
         const gameSettings = await userHelpers.getGameSettings();
-        res.json({ success: !!gameSettings, startTime: gameSettings?.gameStartTime });
+        if (!gameSettings || !gameSettings.gameStartTime) {
+            res.json({ success: false });
+        } else {
+            res.json({ success: true, startTime: gameSettings.gameStartTime });
+        }
     } catch (error) {
         console.error("Error fetching game settings:", error);
-        res.status(500).json({ success: false, message: "Error fetching timer status" });
-    }
-});
-
-// 🔹 Start Game & Fetch First Clue
-router.get('/start-game', async (req, res) => {
-    const firstClue = await userHelpers.getFirstClue();
-    if (firstClue) {
-        res.render('user/clue-page', { clue: firstClue });
-    } else {
-        res.send("No clues found!");
-    }
-});
-
-// 🔹 Submit Answer & Fetch Next Clue
-router.post('/submit-answer', async (req, res) => {
-    const { clueId, clueNumber, userAnswer } = req.body;
-    const isCorrect = await userHelpers.checkAnswer(clueId, userAnswer);
-
-    if (isCorrect) {
-        const nextClue = await userHelpers.getNextClue(clueNumber);
-        res.json(nextClue ? { success: true, nextClue } : { success: true, gameOver: true });
-    } else {
         res.json({ success: false });
     }
+});
+
+
+// Get Clue Page
+router.get("/clue/:id", async (req, res) => {
+    try {
+        const clue = await userHelpers.getClue(req.params.id); // Fetch the clue by ID from the database
+        if (!clue) {
+            return res.status(404).send("Clue not found"); // Return error if clue is not found
+        }
+
+        // Render the clue page with the clue text and clue ID
+        res.render("clue-page", { clue: clue.clue, clueId: clue._id });
+    } catch (error) {
+        console.error("Error retrieving clue:", error);
+        res.status(500).send("Error retrieving clue");
+    }
+});
+
+
+// Check Clue Answer (Form Submission)
+router.post("/check-clue/:id", async (req, res) => {
+    const result = await userHelpers.checkClueAnswer(req.params.id, req.body.answer);
+
+    if (result.error) {
+        return res.render('clue-page', { error: result.error, clueId: req.params.id, clue: result.clue });
+    }
+
+    res.redirect(result.nextStep);
+});
+
+// Get Task Page
+router.get("/task/:taskName", (req, res) => {
+    res.render(`tasks/${req.params.taskName}`, { clueId: req.query.clueId });
+});
+
+// Check Task Answer (Form Submission)
+router.post("/check-task/:id", async (req, res) => {
+    const result = await userHelpers.checkTaskAnswer(req.params.id, req.body.taskAnswer);
+
+    if (result.error) {
+        return res.render('tasks/' + result.taskName, { error: result.error, clueId: req.params.id });
+    }
+
+    res.redirect(result.nextClue);
 });
 
 module.exports = router;
