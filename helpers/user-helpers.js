@@ -63,22 +63,26 @@ module.exports = {
     },
 
     // Check task answer and move to the next clue
-    checkTaskAnswer: async (clueId, taskAnswer) => {
-        console.log("Checking task answer for clueId:", clueId); // Debugging log
+    checkTaskAnswer: async (clueId, taskAnswer, userId) => {
+        console.log("Checking task answer for clueId:", clueId);
 
         const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
 
-        // Ensure clue exists before proceeding
         if (!clue) return { error: "Clue not found" };
 
         if (clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase()) {
             console.log("Task answer is correct, moving to next clue.");
 
-            // Calculate next clue number
             const nextClueNumber = (parseInt(clue.clueNumber) + 1).toString();
             const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
 
             if (nextClue) {
+                // ✅ Update user's last solved clue
+                await db.get().collection(collection.USER_COLLECTION).updateOne(
+                    { _id: new ObjectId(userId) },
+                    { $set: { currentClueId: nextClue._id } }
+                );
+
                 return { nextClue: `/clue/${nextClue._id}` };
             } else {
                 return { celebration: true, message: "Congratulations! You completed the treasure hunt!" };
@@ -86,5 +90,30 @@ module.exports = {
         } else {
             return { error: "Wrong task answer, try again!" };
         }
+    },
+
+    startGameTimer: async (userId) => {
+        const startTime = new Date();
+        await db.get().collection(collection.USER_COLLECTION).updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: { gameStartTime: startTime } }
+        );
+        return startTime;
+    },
+
+    getGameTimer: async (userId) => {
+        const user = await db.get().collection(collection.USER_COLLECTION).findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { gameStartTime: 1 } }
+        );
+        return user ? user.gameStartTime : null;
+    },
+
+    getUser: async (userId) => {
+        return await db.get().collection(collection.USER_COLLECTION).findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { currentClueId: 1 } } // Fetch only the necessary field
+        );
     }
+
 };

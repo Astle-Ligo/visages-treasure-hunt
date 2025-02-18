@@ -1,9 +1,10 @@
 <section>
-    <h2>{{user.Name}}, let's start the game!</h2>
+    <h2>{{User.Name}}, let's start the game!</h2>
     <p id="countdown"></p>
 
-    <!-- Initially hidden, only shows when the timer ends -->
-    <a id="startGameLink" href="/clue/{{firstClue._id}}" class="btn btn-success btn-lg" style="display: none;">
+    <!-- Initially hidden, only appears when the countdown ends -->
+    <a id="startGameLink" href="/clue/{{firstClue._id}}" class="btn btn-success btn-lg" style="display: none;"
+        onclick="startNavbarTimer()">
         Start the Game
     </a>
 </section>
@@ -11,7 +12,7 @@
 <script>
     async function startCountdown() {
         try {
-            const response = await fetch("/get-timer-status");
+            const response = await fetch("/get-timer-status"); // Fetch countdown start time
             const data = await response.json();
 
             if (!data.success || !data.startTime) {
@@ -30,7 +31,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(interval);
                     countdownElement.innerText = "Game is now live!";
-                    startGameLink.style.display = "inline-block";
+                    startGameLink.style.display = "inline-block"; // Show start button
                 } else {
                     const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
                     const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
