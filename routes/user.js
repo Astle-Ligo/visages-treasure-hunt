@@ -5,17 +5,25 @@ const { ObjectId } = require('mongodb');
 
 // GET users listing
 router.get('/', async (req, res) => {
-    let user = req.session.user;
-    if (user) {
-        // Fetch the first clue from the database using the helper
-        const firstClue = await userHelpers.getFirstClue();
-        console.log("hai:", firstClue);
+    let User = req.session.user;
+    if (User) {
+        if (!req.session.startTime) {
+            req.session.startTime = Date.now(); // Store start time in session
+        }
 
-        res.render('user/start', { user, firstClue: firstClue[0] });
+        const firstClue = await userHelpers.getFirstClue();
+
+        res.render('user/start', {
+            User,
+            firstClue: firstClue[0],
+            user: true,
+            startTime: req.session.startTime
+        });
     } else {
         res.render('user/landing');
     }
 });
+
 
 // User signup
 router.get('/user-signup', (req, res) => {
@@ -29,7 +37,7 @@ router.post('/user-signup', async (req, res) => {
 
 // User login
 router.get('/user-login', (req, res) => {
-    res.render('user/user-login', { user: true });
+    res.render('user/user-login');
 });
 
 router.post('/user-login', async (req, res) => {
@@ -90,15 +98,29 @@ router.get("/clue/:id", async (req, res) => {
 
 // Check Clue Answer (Form Submission)
 router.post("/clue/:id", async (req, res) => {
-    const result = await userHelpers.checkClueAnswer(req.params.id, req.body.answer);
-    console.log(result);
+    const userId = req.session.user._id;
+    const clueId = req.params.id;
+    const startTime = req.session.startTime;
+
+    const result = await userHelpers.checkClueAnswer(userId, clueId, req.body.answer, startTime);
 
     if (result.error) {
-        return res.render('user/clue-page', { error: result.error, clueId: req.params.id, clue: result.clue });
+        // Fetch the clue again before rendering
+        const clue = await userHelpers.getClue(clueId);
+        if (!clue) {
+            return res.status(404).send("Clue not found");
+        }
+
+        return res.render('user/clue-page', {
+            error: result.error,
+            clueId: clueId,
+            clue: clue // Ensure clue details are passed
+        });
     }
 
     res.redirect(result.nextStep);
 });
+
 
 // Get Task Page (Refactored to use helpers)
 router.get("/task/:taskName/:clueId", async (req, res) => {
@@ -122,7 +144,7 @@ router.get("/task/:taskName/:clueId", async (req, res) => {
         }
 
         // Render the task page
-        res.render(`user/tasks/${taskName}`, { clueId: clue._id, taskAnswer: clue.taskAnswer });
+        res.render(`user/tasks/${taskName}`, { clueId: clue._id, taskAnswer: clue.taskAnswer, taskName: taskName });
     } catch (error) {
         console.error("Error fetching task details:", error);
         res.status(500).send("Error fetching task details");
@@ -130,25 +152,36 @@ router.get("/task/:taskName/:clueId", async (req, res) => {
 });
 
 
-router.post("/task/:id", async (req, res) => {
-    try {
-        const result = await userHelpers.checkTaskAnswer(req.params.id, req.body.taskAnswer);
-        console.log(result);
+router.post("/task/:taskName/:id", async (req, res) => {
+    const userId = req.session.user._id;
+    const clueId = req.params.id;
+    const taskName = req.params.taskName;
+    const startTime = req.session.startTime;
 
-        if (result.error) {
-            return res.render('user/tasks/snake-and-ladder', { error: result.error, clueId: req.params.id });
+    const result = await userHelpers.checkTaskAnswer(userId, clueId, req.body.taskAnswer, startTime);
+
+    if (result.error) {
+        const clue = await userHelpers.getClue(clueId);
+        if (!clue) {
+            return res.status(404).send("Clue not found");
         }
 
-        if (result.celebration) {
-            return res.render('user/celebration', { message: result.message });
-        }
-
-        res.redirect(result.nextClue);
-    } catch (error) {
-        console.error("Error in task submission:", error);
-        res.status(500).send("Internal Server Error");
+        return res.render(`user/tasks/${taskName}`, {
+            error: result.error,
+            clueId: clue._id,
+            taskAnswer: clue.taskAnswer,
+            taskName
+        });
     }
+
+    if (result.celebration) {
+        return res.render('user/celebration', { message: result.message });
+    }
+
+    res.redirect(result.nextStep);
 });
+
+
 
 
 module.exports = router;

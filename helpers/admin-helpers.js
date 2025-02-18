@@ -5,6 +5,8 @@ var collection = require('../config/collection')
 const bcrypt = require('bcrypt')
 
 const { ObjectId } = require('mongodb')
+const async = require('hbs/lib/async')
+const { reject } = require('bcrypt/promises')
 
 module.exports = {
     doSignup: (adminData) => {
@@ -117,4 +119,26 @@ module.exports = {
             resolve(users)
         })
     },
+
+    getUserResponses: () => {
+        return new Promise(async (resolve, reject) => {
+            let responses = await db.get().collection(collection.USER_RESPONSE_COLLECTION).find().toArray()
+            resolve(responses)
+        })
+    },
+
+    getLeaderboard: async () => {
+        try {
+            const leaderboard = await db.get().collection(collection.USER_COLLECTION)
+                .find({}, { projection: { name: 1, college: 1, level: 1, totalTime: 1 } }) // Fetch required fields
+                .sort({ level: -1, totalTime: 1 }) // Sort by level (desc) and time taken (asc)
+                .toArray();
+
+            return leaderboard;
+        } catch (error) {
+            console.error("Error fetching leaderboard:", error);
+            throw error;
+        }
+    }
+
 }
