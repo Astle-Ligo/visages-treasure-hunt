@@ -3,6 +3,15 @@ const collection = require('../config/collection');
 const { ObjectId } = require('mongodb');
 const bcrypt = require('bcrypt');
 
+const formatTime = (seconds) => {
+    if (isNaN(seconds) || seconds < 0) return "0h 0m 0s"; // Handle invalid cases
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+};
+
 module.exports = {
     doSignup: async (userData) => {
         userData.Password = await bcrypt.hash(userData.Password, 10);
@@ -41,57 +50,96 @@ module.exports = {
     },
 
     // Check the answer to a clue
-    checkClueAnswer: async (clueId, answer) => {
+    checkClueAnswer: async (userId, clueId, answer, startTime) => {
         const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
         if (!clue) return { error: "Clue not found" };
 
-        if (clue.answer.toLowerCase() === answer.toLowerCase()) {
-            console.log("Answer is correct, moving to task page.");
+        const isCorrect = clue.answer.toLowerCase() === answer.toLowerCase();
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000); // Time in seconds
 
-            // Fetch task details (taskName, taskAnswer) from the clue
-            const taskName = clue.taskName;
-            const taskAnswer = clue.taskAnswer;
+        await module.exports.storeUserResponse(userId, clueId, clue.clueNumber, null, answer, isCorrect, formatTime(timeTaken));
 
-            return {
-                nextStep: `/task/${taskName}/${clue._id}`,
-                taskName: taskName,
-                taskAnswer: taskAnswer
-            };
+
+        if (isCorrect) {
+            return { nextStep: `/task/${clue.taskName}/${clue._id}` };
         } else {
             return { error: "Incorrect answer, try again!" };
         }
     },
 
+
     // Check task answer and move to the next clue
+<<<<<<< HEAD
     checkTaskAnswer: async (clueId, taskAnswer, userId) => {
+=======
+    checkTaskAnswer: async (userId, clueId, taskAnswer, startTime) => {
+>>>>>>> 312e538 (backend 95% done)
         console.log("Checking task answer for clueId:", clueId);
 
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
+        let objectId;
+        try {
+            objectId = new ObjectId(clueId);
+        } catch (error) {
+            console.error("Invalid clueId format:", clueId);
+            return { error: "Invalid clue ID" };
+        }
 
+<<<<<<< HEAD
         if (!clue) return { error: "Clue not found" };
+=======
+        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: objectId });
+>>>>>>> 312e538 (backend 95% done)
 
-        if (clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase()) {
-            console.log("Task answer is correct, moving to next clue.");
+        if (!clue) {
+            console.log("❌ Clue not found in DB for _id:", clueId);
+            return { error: "Clue not found" };
+        }
+
+        const isCorrect = clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase();
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        const formattedTime = formatTime(timeTaken);
+
+        await module.exports.storeUserResponse(userId, clueId, null, clue.taskName, taskAnswer, isCorrect, formattedTime);
+
+        if (isCorrect) {
+            console.log("✅ Task answer is correct!");
+
+            await db.get().collection(collection.USER_COLLECTION).updateOne(
+                { _id: new ObjectId(userId) },
+                { $set: { lastCompletedClue: clue.clueNumber, timeTaken: formattedTime } }
+            );
 
             const nextClueNumber = (parseInt(clue.clueNumber) + 1).toString();
             const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
 
             if (nextClue) {
+<<<<<<< HEAD
                 // ✅ Update user's last solved clue
+=======
+                console.log("✅ Next clue found:", nextClue._id);
+
+>>>>>>> 312e538 (backend 95% done)
                 await db.get().collection(collection.USER_COLLECTION).updateOne(
                     { _id: new ObjectId(userId) },
                     { $set: { currentClueId: nextClue._id } }
                 );
 
+<<<<<<< HEAD
                 return { nextClue: `/clue/${nextClue._id}` };
+=======
+                return { nextStep: `/clue/${nextClue._id}` };
+>>>>>>> 312e538 (backend 95% done)
             } else {
+                console.log("🎉 Treasure hunt completed!");
                 return { celebration: true, message: "Congratulations! You completed the treasure hunt!" };
             }
         } else {
-            return { error: "Wrong task answer, try again!" };
+            console.log("❌ Wrong task answer, try again!");
+            return { error: "Incorrect answer, try again!" };
         }
     },
 
+<<<<<<< HEAD
     startGameTimer: async (userId) => {
         const startTime = new Date();
         await db.get().collection(collection.USER_COLLECTION).updateOne(
@@ -116,4 +164,34 @@ module.exports = {
         );
     }
 
+=======
+
+    // Store user responses
+    storeUserResponse: async (userId, clueId, clueNumber, taskName, answer, isCorrect, timeTaken) => {
+        const user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
+
+        const responseEntry = {
+            clueId: new ObjectId(clueId),
+            clueNumber,
+            taskName,
+            answer,
+            isCorrect,
+            timeTaken,
+            timestamp: new Date(),
+        };
+
+        await db.get().collection(collection.USER_RESPONSE_COLLECTION).updateOne(
+            { userId: new ObjectId(userId) },
+            {
+                $setOnInsert: { userId: new ObjectId(userId), userName: user.Name }, // Add userName on first entry
+                $push: { responses: responseEntry }
+            },
+            { upsert: true }
+        );
+    }
+
+
+
+
+>>>>>>> 312e538 (backend 95% done)
 };

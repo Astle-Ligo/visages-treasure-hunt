@@ -5,26 +5,34 @@ const adminHelpers = require('../helpers/admin-helpers');
 const userHelpers = require('../helpers/user-helpers');
 
 const { log } = require('handlebars');
+const async = require('hbs/lib/async');
 
 /* GET home page. */
-router.get('/', (req, res) => {
-  console.log("hai");
+router.get('/', async (req, res) => {
+  console.log("Admin Dashboard Loaded");
 
-  let adminUser = req.session.admin
-  console.log(adminUser);
+  let adminUser = req.session.admin;
 
-  if (adminUser) {
-    res.render('admin/admin-dashboard', { admin: true, adminUser })
-  } else {
-    adminHelpers.findAdminCount().then((result) => {
-      if (result.status > 0) {
-        res.render('admin/no-user', { admin: true, count: true })
-      } else {
-        res.render('admin/no-user', { admin: true, count: false })
-      }
-    })
+  if (!adminUser) {
+    return res.redirect('/admin/admin-login');
+  }
+
+  try {
+    const leaderboard = await adminHelpers.getLeaderboard();
+console.log(leaderboard);
+
+    res.render('admin/admin-dashboard', {
+      admin: true,
+      adminUser,
+      leaderboard
+    });
+  } catch (error) {
+    console.error("Error loading admin dashboard:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
+
+
 
 
 router.get('/admin-signup', (req, res) => {
@@ -131,6 +139,14 @@ router.post("/game-settings", async (req, res) => {
     res.status(500).send("Error saving game start time.");
   }
 });
+
+router.get("/responses", async (req, res) => {
+  let adminUser = req.session.admin
+  const responses = await adminHelpers.getUserResponses();
+  console.log(responses);
+
+  res.render("admin/responses", { adminUser, admin: true, responses })
+})
 
 
 
