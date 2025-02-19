@@ -127,18 +127,44 @@ module.exports = {
         })
     },
 
-    getLeaderboard: async () => {
-        try {
-            const leaderboard = await db.get().collection(collection.USER_COLLECTION)
-                .find({}, { projection: { name: 1, college: 1, level: 1, totalTime: 1 } }) // Fetch required fields
-                .sort({ level: -1, totalTime: 1 }) // Sort by level (desc) and time taken (asc)
-                .toArray();
+    getLeaderboard: () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let leaderboard = await db.get().collection(collection.USER_COLLECTION).aggregate([
+                    {
+                        $project: {
+                            _id: 1,
+                            teamName: "$Name",
+                            collegeName: "$collegeName",
+                            lastCompletedClue: {
+                                $toInt: {
+                                    $ifNull: [
+                                        { $toString: "$lastCompletedClue" }, // Convert to string first
+                                        "0" // Default to "0" if null/undefined
+                                    ]
+                                }
+                            },
+                            timeTaken: "$formattedTime",
+                            totalTimeTaken: {
+                                $toInt: {
+                                    $ifNull: [
+                                        { $toString: "$totalTimeTaken" }, // Convert to string first
+                                        "0" // Default to "0" if null/undefined
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    { $sort: { lastCompletedClue: -1, totalTimeTaken: 1 } } // Rank by level & time
+                ]).toArray();
 
-            return leaderboard;
-        } catch (error) {
-            console.error("Error fetching leaderboard:", error);
-            throw error;
-        }
-    }
+                resolve(leaderboard);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    },
+
+
 
 }

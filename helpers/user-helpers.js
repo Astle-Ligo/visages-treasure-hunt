@@ -49,95 +49,146 @@ module.exports = {
         }
     },
 
-    // Check the answer to a clue
+    // ✅ Check Clue Answer
     checkClueAnswer: async (userId, clueId, answer, startTime) => {
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
-        if (!clue) return { error: "Clue not found" };
+        try {
+            const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: new ObjectId(clueId) });
+            if (!clue) return { error: "Clue not found" };
 
-        const isCorrect = clue.answer.toLowerCase() === answer.toLowerCase();
-        const timeTaken = Math.floor((Date.now() - startTime) / 1000); // Time in seconds
+            const isCorrect = clue.answer.toLowerCase() === answer.toLowerCase();
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
 
-        await module.exports.storeUserResponse(userId, clueId, clue.clueNumber, null, answer, isCorrect, formatTime(timeTaken));
+            await module.exports.storeUserResponse(userId, clueId, clue.clueNumber, null, answer, isCorrect, timeTaken, formatTime(timeTaken));
 
-
-        if (isCorrect) {
-            return { nextStep: `/task/${clue.taskName}/${clue._id}` };
-        } else {
-            return { error: "Incorrect answer, try again!" };
+            if (isCorrect) {
+                return {
+                    success: "✅ Correct answer! Proceeding to task...",
+                    nextStep: `/task/${clue.taskName}/${clue._id}`
+                };
+            } else {
+                return { error: "❌ Incorrect answer, try again!" };
+            }
+        } catch (error) {
+            console.error("❌ Error in checkClueAnswer:", error);
+            return { error: "Error processing answer" };
         }
     },
 
-
-    // Check task answer and move to the next clue
     checkTaskAnswer: async (userId, clueId, taskAnswer, startTime) => {
-        console.log("Checking task answer for clueId:", clueId);
-
-        let objectId;
         try {
-            objectId = new ObjectId(clueId);
-        } catch (error) {
-            console.error("Invalid clueId format:", clueId);
-            return { error: "Invalid clue ID" };
-        }
+            console.log("Checking task answer for clueId:", clueId);
 
-        const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: objectId });
+            let objectId;
+            try {
+                objectId = new ObjectId(clueId);
+            } catch (error) {
+                console.error("Invalid clueId format:", clueId);
+                return { error: "Invalid clue ID" };
+            }
 
-        if (!clue) {
-            console.log("❌ Clue not found in DB for _id:", clueId);
-            return { error: "Clue not found" };
-        }
+            const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: objectId });
 
-        const isCorrect = clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase();
-        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-        const formattedTime = formatTime(timeTaken);
+            if (!clue) {
+                console.log("❌ Clue not found in DB for _id:", clueId);
+                return { error: "Clue not found" };
+            }
 
-        await module.exports.storeUserResponse(userId, clueId, null, clue.taskName, taskAnswer, isCorrect, formattedTime);
+            const isCorrect = clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase();
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            const formattedTime = formatTime(timeTaken);
 
-        if (isCorrect) {
-            console.log("✅ Task answer is correct!");
+            await module.exports.storeUserResponse(userId, clueId, null, clue.taskName, taskAnswer, isCorrect, timeTaken, formattedTime);
 
-            await db.get().collection(collection.USER_COLLECTION).updateOne(
-                { _id: new ObjectId(userId) },
-                { $set: { lastCompletedClue: clue.clueNumber, timeTaken: formattedTime } }
-            );
-
-            const nextClueNumber = (parseInt(clue.clueNumber) + 1).toString();
-            const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
-
-            if (nextClue) {
-                console.log("✅ Next clue found:", nextClue._id);
+            if (isCorrect) {
+                console.log("✅ Task answer is correct!");
 
                 await db.get().collection(collection.USER_COLLECTION).updateOne(
                     { _id: new ObjectId(userId) },
-                    { $set: { currentClueId: nextClue._id } }
+                    {
+                        $set: { lastCompletedClue: clue.clueNumber },
+                        $inc: { totalTimeTaken: timeTaken }
+                    }
                 );
 
-                return { nextStep: `/clue/${nextClue._id}` };
+                const nextClueNumber = (parseInt(clue.clueNumber) + 1).toString();
+                const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
+
+                if (nextClue) {
+                    console.log("✅ Next clue found:", nextClue._id);
+
+                    await db.get().collection(collection.USER_COLLECTION).updateOne(
+                        { _id: new ObjectId(userId) },
+                        { $set: { currentClueId: nextClue._id } }
+                    );
+
+                    return {
+                        success: "🎉 Task completed! Moving to the next clue...",
+                        nextStep: `/clue/${nextClue._id}`
+                    };
+                } else {
+                    console.log("🎉 Treasure hunt completed!");
+                    return { celebration: true, message: "🏆 Congratulations! You completed the treasure hunt!" };
+                }
             } else {
-                console.log("🎉 Treasure hunt completed!");
-                return { celebration: true, message: "Congratulations! You completed the treasure hunt!" };
+                console.log("❌ Wrong task answer, try again!");
+                return { error: "❌ Incorrect answer, try again!" };
             }
-        } else {
-            console.log("❌ Wrong task answer, try again!");
-            return { error: "Incorrect answer, try again!" };
+        } catch (error) {
+            console.error("❌ Error in checkTaskAnswer:", error);
+            return { error: "Error processing task answer" };
         }
     },
 
+
+    // ✅ Start game timer (only if not already started)
     startGameTimer: async (userId) => {
-        const startTime = new Date();
-        await db.get().collection(collection.USER_COLLECTION).updateOne(
-            { _id: new ObjectId(userId) },
-            { $set: { gameStartTime: startTime } }
-        );
-        return startTime;
+        try {
+            const user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
+
+            if (user && user.gameStartTime) {
+                return user.gameStartTime;  // Return existing start time if already started
+            }
+
+            const startTime = new Date();
+            await db.get().collection(collection.USER_COLLECTION).updateOne(
+                { _id: new ObjectId(userId) },
+                { $set: { gameStartTime: startTime } }
+            );
+
+            return startTime;
+        } catch (error) {
+            console.error("❌ Error in startGameTimer:", error);
+            return null;
+        }
     },
 
+    // ✅ Get elapsed time (timer should continue even after logout)
     getGameTimer: async (userId) => {
-        const user = await db.get().collection(collection.USER_COLLECTION).findOne(
-            { _id: new ObjectId(userId) },
-            { projection: { gameStartTime: 1 } }
-        );
-        return user ? user.gameStartTime : null;
+        try {
+            if (!ObjectId.isValid(userId)) return { error: "Invalid user ID format" };
+
+            const user = await db.get().collection(collection.USER_COLLECTION).findOne(
+                { _id: new ObjectId(userId) },
+                { projection: { gameStartTime: 1 } }
+            );
+
+            if (!user || !user.gameStartTime) {
+                return { error: "Game has not started yet." };
+            }
+
+            const startTime = new Date(user.gameStartTime).getTime();
+            const currentTime = Date.now();
+            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+
+            return {
+                gameStartTime: user.gameStartTime,
+                elapsedTime: elapsedSeconds,
+                formattedTime: formatTime(elapsedSeconds),
+            };
+        } catch (error) {
+            console.error("❌ Error fetching game timer:", error);
+            return { error: "Failed to retrieve game timer." };
+        }
     },
 
     getUser: async (userId) => {
@@ -149,7 +200,7 @@ module.exports = {
 
 
     // Store user responses
-    storeUserResponse: async (userId, clueId, clueNumber, taskName, answer, isCorrect, timeTaken) => {
+    storeUserResponse: async (userId, clueId, clueNumber, taskName, answer, isCorrect, timeTaken, formattedTime) => {
         const user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
 
         const responseEntry = {
@@ -158,19 +209,31 @@ module.exports = {
             taskName,
             answer,
             isCorrect,
-            timeTaken,
+            timeTaken,  // Store in seconds for calculations
+            formattedTime,  // Store formatted time (h m s)
             timestamp: new Date(),
         };
 
+        // Store response in USER_RESPONSE_COLLECTION
         await db.get().collection(collection.USER_RESPONSE_COLLECTION).updateOne(
             { userId: new ObjectId(userId) },
             {
-                $setOnInsert: { userId: new ObjectId(userId), userName: user.Name }, // Add userName on first entry
+                $setOnInsert: { userId: new ObjectId(userId), userName: user.Name },
                 $push: { responses: responseEntry }
             },
             { upsert: true }
         );
+
+        // Update user total time and formatted time
+        await db.get().collection(collection.USER_COLLECTION).updateOne(
+            { _id: new ObjectId(userId) },
+            {
+                $inc: { totalTimeTaken: timeTaken },  // Increment total seconds
+                $set: { formattedTime: formattedTime } // Store readable format
+            }
+        );
     },
+
 
 
     getFinalResults: async (userId) => {
@@ -180,20 +243,23 @@ module.exports = {
 
         const user = await db.get().collection(collection.USER_COLLECTION).findOne(
             { _id: new ObjectId(userId) },
-            { projection: { Name: 1, timeTaken: 1 } }  // Fetch Name and timeTaken
+            { projection: { Name: 1, formattedTime: 1 } }  // Fetch Name and formattedTime
         );
+
+        console.log(user);
 
         if (!user) {
             console.log("User not found for ID:", userId);
             return { error: "User not found." };
         }
 
-        console.log("Final results:", { teamName: user.Name, totalTime: user.timeTaken });
+        console.log("Final results:", { teamName: user.Name, totalTime: user.formattedTime });
 
         return {
-            teamName: user.Name,  // Using Name instead of teamName
-            totalTime: user.timeTaken
+            teamName: user.Name,
+            totalTime: user.formattedTime  // Corrected to return formatted time
         };
     }
+
 
 }

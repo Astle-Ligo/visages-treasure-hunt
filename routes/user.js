@@ -42,21 +42,32 @@ router.get('/user-login', (req, res) => {
 
 router.post('/user-login', async (req, res) => {
     const response = await userHelpers.doLogin(req.body);
+
     if (response.status) {
         req.session.loggedIn = true;
         req.session.user = response.user;
 
-        // ✅ Fetch user's current clue to resume from there
+        req.session.success = `✅ Welcome back, ${response.user.Name}!`;
+
+        // Fetch user details and game timer from the database
         const user = await userHelpers.getUser(response.user._id);
+        const timerData = await userHelpers.getGameTimer(response.user._id);
+
+        req.session.gameStartTime = timerData.gameStartTime || null;  // Store the game start time in session
+        req.session.elapsedTime = timerData.elapsedTime || 0;         // Store the elapsed time in session
+
         if (user.currentClueId) {
-            res.redirect(`/clue/${user.currentClueId}`);
-        } else {
-            res.redirect('/');
+            return res.redirect(`/clue/${user.currentClueId}`);
         }
+        return res.redirect('/');
     } else {
-        res.redirect('/user/user-login');
+        req.session.error = '❌ Invalid email or password!';
+        return res.redirect('/user-login');
     }
 });
+
+
+
 
 // User log out
 router.get('/user-log-out', (req, res) => {
@@ -87,13 +98,12 @@ router.get("/clue/:id", async (req, res) => {
     console.log("Clue ID received:", req.params.id);
 
     try {
-        // Validate ObjectId
         const clueId = req.params.id;
         if (!ObjectId.isValid(clueId)) {
             return res.status(400).send("Invalid clue ID");
         }
 
-        const clue = await userHelpers.getClue(clueId); // Fetch clue by ID using helper
+        const clue = await userHelpers.getClue(clueId);
 
         if (!clue) {
             return res.status(404).send("Clue not found");
@@ -115,7 +125,6 @@ router.post("/clue/:id", async (req, res) => {
     const result = await userHelpers.checkClueAnswer(userId, clueId, req.body.answer, startTime);
 
     if (result.error) {
-        // Fetch the clue again before rendering
         const clue = await userHelpers.getClue(clueId);
         if (!clue) {
             return res.status(404).send("Clue not found");
@@ -124,36 +133,34 @@ router.post("/clue/:id", async (req, res) => {
         return res.render('user/clue-page', {
             error: result.error,
             clueId: clueId,
-            clue: clue // Ensure clue details are passed
+            clue: clue
         });
     }
 
+    req.session.success = result.success; // Store success message in session
     res.redirect(result.nextStep);
 });
 
 
-// Get Task Page (Refactored to use helpers)
+// Get Task Page
 router.get("/task/:taskName/:clueId", async (req, res) => {
     const taskName = req.params.taskName;
-    const clueId = req.params.clueId;  // Access clueId directly from the URL path
+    const clueId = req.params.clueId;
 
     if (!clueId) {
         return res.status(400).send("Clue ID is missing in the URL path.");
     }
 
     try {
-        // Validate ObjectId (optional but recommended)
         if (!ObjectId.isValid(clueId)) {
             return res.status(400).send("Invalid clue ID");
         }
 
-        // Fetch clue details based on clueId using helper
         const clue = await userHelpers.getClue(clueId);
         if (!clue) {
             return res.status(404).send("Clue not found");
         }
 
-        // Render the task page
         res.render(`user/tasks/${taskName}`, { clueId: clue._id, taskAnswer: clue.taskAnswer, taskName: taskName });
     } catch (error) {
         console.error("Error fetching task details:", error);
@@ -161,7 +168,7 @@ router.get("/task/:taskName/:clueId", async (req, res) => {
     }
 });
 
-
+// Check Task Answer (Form Submission)
 router.post("/task/:taskName/:id", async (req, res) => {
     const userId = req.session.user._id;
     const clueId = req.params.id;
@@ -185,15 +192,21 @@ router.post("/task/:taskName/:id", async (req, res) => {
     }
 
     if (result.celebration) {
-        console.log("🎉 Redirecting to /celebration page!");
-        return res.redirect("/celebration");  // Redirect to final page
+        req.session.gameCompleted = true; // Store flag in session
+        return res.redirect("/celebration"); // Redirect to GET route
     }
 
+    req.session.success = result.success; // Store success message in session
     res.redirect(result.nextStep);
 });
 
 
+// GET Method for Celebration Page
 router.get("/celebration", async (req, res) => {
+    if (!req.session.gameCompleted) {
+        return res.redirect("/"); // Redirect to home if game isn't complete
+    }
+
     const userId = req.session.user._id;
     const finalResults = await userHelpers.getFinalResults(userId);
 
@@ -205,7 +218,11 @@ router.get("/celebration", async (req, res) => {
         teamName: finalResults.teamName,
         totalTime: finalResults.totalTime
     });
+
+    // Clear session after rendering
+    req.session.gameCompleted = false;
 });
+
 
 
 module.exports = router;

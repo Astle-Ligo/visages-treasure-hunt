@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 
   try {
     const leaderboard = await adminHelpers.getLeaderboard();
-console.log(leaderboard);
+    console.log(leaderboard);
 
     res.render('admin/admin-dashboard', {
       admin: true,
@@ -31,8 +31,6 @@ console.log(leaderboard);
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 
 router.get('/admin-signup', (req, res) => {
