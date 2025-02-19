@@ -7,14 +7,6 @@ const { ObjectId } = require('mongodb');
 router.get('/', async (req, res) => {
     let User = req.session.user;
     if (User) {
-<<<<<<< HEAD
-        // Fetch the first clue from the database using the helper
-        const firstClue = await userHelpers.getFirstClue();
-        console.log("hai:", firstClue);
-        console.log(User);
-
-        res.render('user/start', { User, user: true, firstClue: firstClue[0] });
-=======
         if (!req.session.startTime) {
             req.session.startTime = Date.now(); // Store start time in session
         }
@@ -27,7 +19,6 @@ router.get('/', async (req, res) => {
             user: true,
             startTime: req.session.startTime
         });
->>>>>>> 312e538 (backend 95% done)
     } else {
         res.render('user/landing');
     }
@@ -46,11 +37,7 @@ router.post('/user-signup', async (req, res) => {
 
 // User login
 router.get('/user-login', (req, res) => {
-<<<<<<< HEAD
-    res.render('user/user-login',);
-=======
     res.render('user/user-login');
->>>>>>> 312e538 (backend 95% done)
 });
 
 router.post('/user-login', async (req, res) => {
@@ -97,8 +84,6 @@ router.get("/get-timer-status", async (req, res) => {
 
 // Get Clue Page
 router.get("/clue/:id", async (req, res) => {
-    let User = req.session.user;
-
     console.log("Clue ID received:", req.params.id);
 
     try {
@@ -114,7 +99,7 @@ router.get("/clue/:id", async (req, res) => {
             return res.status(404).send("Clue not found");
         }
 
-        res.render("user/clue-page", { clue, User, user: true });
+        res.render("user/clue-page", { clue });
     } catch (error) {
         console.error("Error retrieving clue:", error);
         res.status(500).send("Error retrieving clue");
@@ -123,14 +108,6 @@ router.get("/clue/:id", async (req, res) => {
 
 // Check Clue Answer (Form Submission)
 router.post("/clue/:id", async (req, res) => {
-<<<<<<< HEAD
-    let User = req.session.user;
-    const result = await userHelpers.checkClueAnswer(req.params.id, req.body.answer);
-    console.log(result);
-
-    if (result.error) {
-        return res.render('user/clue-page', { error: result.error, clueId: req.params.id, clue: result.clue, User, user: true });
-=======
     const userId = req.session.user._id;
     const clueId = req.params.id;
     const startTime = req.session.startTime;
@@ -149,7 +126,6 @@ router.post("/clue/:id", async (req, res) => {
             clueId: clueId,
             clue: clue // Ensure clue details are passed
         });
->>>>>>> 312e538 (backend 95% done)
     }
 
     res.redirect(result.nextStep);
@@ -208,33 +184,28 @@ router.post("/task/:taskName/:id", async (req, res) => {
         });
     }
 
-<<<<<<< HEAD
-    router.post("/start-game", async (req, res) => {
-        if (!req.session.user) return res.json({ success: false, message: "User not logged in" });
-
-        const startTime = await userHelpers.startGameTimer(req.session.user._id);
-        res.json({ success: true, startTime });
-    });
-
-    router.get("/get-timer", async (req, res) => {
-        if (!req.session.user) return res.json({ success: false });
-
-        const startTime = await userHelpers.getGameTimer(req.session.user._id);
-        if (!startTime) return res.json({ success: false });
-
-        res.json({ success: true, startTime });
-    });
-
-=======
     if (result.celebration) {
-        return res.render('user/celebration', { message: result.message });
+        console.log("🎉 Redirecting to /celebration page!");
+        return res.redirect("/celebration");  // Redirect to final page
     }
 
     res.redirect(result.nextStep);
->>>>>>> 312e538 (backend 95% done)
 });
 
 
+router.get("/celebration", async (req, res) => {
+    const userId = req.session.user._id;
+    const finalResults = await userHelpers.getFinalResults(userId);
+
+    if (finalResults.error) {
+        return res.status(404).send(finalResults.error);
+    }
+
+    res.render("user/celebration", {
+        teamName: finalResults.teamName,
+        totalTime: finalResults.totalTime
+    });
+});
 
 
 module.exports = router;

@@ -69,11 +69,7 @@ module.exports = {
 
 
     // Check task answer and move to the next clue
-<<<<<<< HEAD
-    checkTaskAnswer: async (clueId, taskAnswer, userId) => {
-=======
     checkTaskAnswer: async (userId, clueId, taskAnswer, startTime) => {
->>>>>>> 312e538 (backend 95% done)
         console.log("Checking task answer for clueId:", clueId);
 
         let objectId;
@@ -84,11 +80,7 @@ module.exports = {
             return { error: "Invalid clue ID" };
         }
 
-<<<<<<< HEAD
-        if (!clue) return { error: "Clue not found" };
-=======
         const clue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ _id: objectId });
->>>>>>> 312e538 (backend 95% done)
 
         if (!clue) {
             console.log("❌ Clue not found in DB for _id:", clueId);
@@ -113,22 +105,14 @@ module.exports = {
             const nextClue = await db.get().collection(collection.CLUE_COLLECTION).findOne({ clueNumber: nextClueNumber });
 
             if (nextClue) {
-<<<<<<< HEAD
-                // ✅ Update user's last solved clue
-=======
                 console.log("✅ Next clue found:", nextClue._id);
 
->>>>>>> 312e538 (backend 95% done)
                 await db.get().collection(collection.USER_COLLECTION).updateOne(
                     { _id: new ObjectId(userId) },
                     { $set: { currentClueId: nextClue._id } }
                 );
 
-<<<<<<< HEAD
-                return { nextClue: `/clue/${nextClue._id}` };
-=======
                 return { nextStep: `/clue/${nextClue._id}` };
->>>>>>> 312e538 (backend 95% done)
             } else {
                 console.log("🎉 Treasure hunt completed!");
                 return { celebration: true, message: "Congratulations! You completed the treasure hunt!" };
@@ -139,7 +123,6 @@ module.exports = {
         }
     },
 
-<<<<<<< HEAD
     startGameTimer: async (userId) => {
         const startTime = new Date();
         await db.get().collection(collection.USER_COLLECTION).updateOne(
@@ -162,9 +145,8 @@ module.exports = {
             { _id: new ObjectId(userId) },
             { projection: { currentClueId: 1 } } // Fetch only the necessary field
         );
-    }
+    },
 
-=======
 
     // Store user responses
     storeUserResponse: async (userId, clueId, clueNumber, taskName, answer, isCorrect, timeTaken) => {
@@ -188,10 +170,30 @@ module.exports = {
             },
             { upsert: true }
         );
+    },
+
+
+    getFinalResults: async (userId) => {
+        if (!ObjectId.isValid(userId)) {
+            return { error: "Invalid user ID format" };
+        }
+
+        const user = await db.get().collection(collection.USER_COLLECTION).findOne(
+            { _id: new ObjectId(userId) },
+            { projection: { Name: 1, timeTaken: 1 } }  // Fetch Name and timeTaken
+        );
+
+        if (!user) {
+            console.log("User not found for ID:", userId);
+            return { error: "User not found." };
+        }
+
+        console.log("Final results:", { teamName: user.Name, totalTime: user.timeTaken });
+
+        return {
+            teamName: user.Name,  // Using Name instead of teamName
+            totalTime: user.timeTaken
+        };
     }
 
-
-
-
->>>>>>> 312e538 (backend 95% done)
-};
+}
