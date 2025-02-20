@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 const adminHelpers = require('../helpers/admin-helpers');
-const userHelpers = require('../helpers/user-helpers');
 
 const { log } = require('handlebars');
 const async = require('hbs/lib/async');
