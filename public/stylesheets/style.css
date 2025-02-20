@@ -1,12 +1,379 @@
+@import url('https://fonts.googleapis.com/css2?family=Zeyada&display=swap');
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  height: 100dvh;
+  width: 100dvw;
+  display: flex;
+  flex-direction: column;
 }
 
-a {
-  color: #00B7FF;
+.navbar {
+  background-color: #0069ff;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 4rem;
+  z-index: 10;
 }
 
-.heading{
-  color: green;
+.navbar-brand {
+  color: white;
+  font-family: 'zeyada';
+  font-size: 2rem !important;
+  font-weight: 600;
+}
+
+.nav-item {
+  font-family: 'zeyada';
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  width: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item>a {
+  color: white;
+  text-decoration: none;
+}
+
+.body-container {
+  background: url(/images/bg.jpeg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex: 1;
+  /* Fills remaining space */
+  width: 100%;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-grid-box {
+  background-image: url(/images/paper.webp);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 1px 15px 20px 0px rgba(0, 0, 0, 0.5);
+  width: clamp(20rem, 90%, 30rem);
+  height: clamp(15rem, 70%, 32rem);
+  font-family: 'Zeyada';
+  padding: 1.5rem;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paper-grid-box-big {
+  background-image: url(/images/paper.webp);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 1px 15px 20px 0px rgba(0, 0, 0, 0.5);
+  width: clamp(20rem, 90%, 80rem);
+  height: clamp(15rem, 80%, 36rem);
+  font-family: 'Zeyada';
+  padding: 1.5rem;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-center {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.formContainer,
+.formBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.formLabel {
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: 12.5rem;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  border-bottom: solid black 2px;
+}
+
+.form-control {
+  font-size: 1.25rem !important;
+  font-weight: 500 !important;
+  font-family: serif !important;
+}
+
+.clueText {
+  color: black;
+  font-size: 2.1rem;
+
+}
+
+.submitButton {
+  width: 10rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.btn {
+  font-size: 1.5rem !important;
+}
+
+footer {
+  width: 100%;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+}
+
+.landingHeader {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.landingText {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: red;
+}
+
+.clueHeader {
+  font-size: 3rem;
+  font-weight: 700;
+  color: rgb(49, 10, 147);
+}
+
+.clueForm {
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.formAnswerBox {
+  width: 30rem !important;
+  border: none !important;
+  border-bottom: solid 2px black !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.landingHeader>span {
+  color: red;
+  font-size: 3.25rem;
+}
+
+.celbTimer {
+  color: green !important;
+}
+
+.countdown {
+  font-size: 3rem;
+  font-weight: 500;
+}
+
+.start-box {
+  justify-content: space-evenly;
+}
+
+.startButton {
+  width: 15rem;
+  font-size: 2rem !important;
+}
+
+.snake-ladder {
+  background-image: url(/images/paper.webp);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 1px 15px 20px 0px rgba(0, 0, 0, 0.5);
+  width: clamp(20rem, 70%, 70rem);
+  height: clamp(15rem, 80%, 36rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.snake-ladder-left {
+  width: 30rem;
+  aspect-ratio: 1;
+  background: url(/images/snake-and-ladder.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.snake-ladder-right {
+  width: 25rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.taskForm {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  height: 10rem;
+  width: 100%;
+}
+
+.taskAnswer {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.taskAnswerText {
+  font-family: 'Zeyada';
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.taskAnswerBox {
+  width: 15rem !important;
+  border: none !important;
+  border-bottom: solid 2px black !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+}
+
+.taskHeader {
+  color: red;
+  font-size: 3rem;
+  font-weight: 600;
+  font-family: 'Zeyada';
+}
+
+.taskText {
+  color: black;
+  font-size: 2.5rem;
+  font-family: 'Zeyada';
+  font-weight: 600;
+}
+
+.decrypt {
+  width: 60rem;
+  height: 27rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  background: url(/images/paper.webp);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.decrypt-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.decrpyt-left {
+  width: 25rem;
+  height: 18rem;
+  background-color: rebeccapurple;
+  font-family: serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+
+.decrpyt-right {
+  width: 25rem;
+  height: 18rem;
+  background-color: aqua;
+}
+
+.decrpytForm {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.decrpytAnswer {
+  width: 90%;
+  height: 60%;
+}
+
+.audioForm {
+  width: 100%;
+  height: 2rem;
+  display: flex;
+}
+
+.cont {
+  text-align: center;
+}
+
+.celebrate-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.celebrate-btn:hover {
+  background-color: #C71729;
+}
+
+.celebrate-btn:active {
+  transform: scale(0.98);
 }

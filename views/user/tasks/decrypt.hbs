@@ -1,8 +1,21 @@
-<section>
-    <h1>Decrpyt</h1>
-    <form action="/task/{{taskName}}/{{clueId}}" method="POST">
-        <label for="taskAnswer">Your Answer:</label>
-        <input type="text" name="taskAnswer" id="taskAnswer" placeholder="Enter your answer" required>
-        <input type="submit" value="Submit">
-    </form>
+<section class="decrypt">
+    <h1 class="taskHeader">Decrpytion</h1>
+    <p>Decrypt this code with the guide you were provided :)</p>
+    <div class="decrypt-box">
+        <div class="decrpyt-left">
+            <p>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores aliquam in rem sit blanditiis nisi
+                natus voluptatem aliquid! Rerum blanditiis hic dignissimos libero officiis quae illo vero ullam amet
+                reprehenderit qui, quo, fuga, ex expedita ea sapiente ad labore architecto minus ipsam sit. Sint modi
+                perferendis sequi iusto enim hic.
+            </p>
+        </div>
+        <div class="decrpyt-right">
+            <form action="/task/{{taskName}}/{{clueId}}" method="POST" class="decrpytForm">
+                <label for="taskAnswer">Your Answer:</label>
+                <textarea name="taskAnswer" id="taskAnswer" class="decrpytAnswer" required></textarea>
+                <input type="submit" value="Submit" class="btn btn-primary submitButton">
+            </form>
+        </div>
+    </div>
 </section>

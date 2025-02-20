@@ -1,1 +1,56 @@
-<h1 class="heading">{{teamName}} have completed the treasure hunt in {{totalTime}}.</h1>
+<div class="cont paper-grid-box">
+    <h1 class="landingHeader"><span>{{teamName}}</span> have completed the treasure hunt in <span class="celbTimer">{{totalTime}}</span>.</h1>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script>
+    // Trigger confetti automatically when the page loads
+    window.onload = () => {
+        setTimeout(() => {
+            const duration = 1000; // Duration of confetti effect
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // Confetti from TOP-LEFT
+                confetti({
+                    particleCount: 50,
+                    spread: 1000,
+                    startVelocity: 50, // Shoots downward
+                    origin: { x: 0, y: 0 }, // Top-left
+                    angle: 45
+                });
+
+                // Confetti from TOP-RIGHT
+                confetti({
+                    particleCount: 50,
+                    spread: 1000,
+                    startVelocity: 50, // Shoots downward
+                    origin: { x: 1, y: 0 }, // Top-right
+                    angle: 135
+                });
+
+                // Confetti from BOTTOM-LEFT
+                confetti({
+                    particleCount: 50,
+                    spread: 1000,
+                    startVelocity: 50, // Shoots UPWARD now!
+                    origin: { x: 0, y: 1 }, // Bottom-left
+                    angle: 315
+                });
+
+                // Confetti from BOTTOM-RIGHT
+                confetti({
+                    particleCount: 50,
+                    spread: 1000,
+                    startVelocity: 50, // Shoots UPWARD now!
+                    origin: { x: 1, y: 1 }, // Bottom-right
+                    angle: 225
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            })();
+        }, 200);
+    };
+</script>

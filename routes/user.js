@@ -96,7 +96,7 @@ router.get("/get-timer-status", async (req, res) => {
 // Get Clue Page
 router.get("/clue/:id", async (req, res) => {
     console.log("Clue ID received:", req.params.id);
-
+    let User = req.session.user;
     try {
         const clueId = req.params.id;
         if (!ObjectId.isValid(clueId)) {
@@ -109,7 +109,7 @@ router.get("/clue/:id", async (req, res) => {
             return res.status(404).send("Clue not found");
         }
 
-        res.render("user/clue-page", { clue });
+        res.render("user/clue-page", { clue, User });
     } catch (error) {
         console.error("Error retrieving clue:", error);
         res.status(500).send("Error retrieving clue");
@@ -146,6 +146,7 @@ router.post("/clue/:id", async (req, res) => {
 router.get("/task/:taskName/:clueId", async (req, res) => {
     const taskName = req.params.taskName;
     const clueId = req.params.clueId;
+    let User = req.session.user;
 
     if (!clueId) {
         return res.status(400).send("Clue ID is missing in the URL path.");
@@ -161,7 +162,9 @@ router.get("/task/:taskName/:clueId", async (req, res) => {
             return res.status(404).send("Clue not found");
         }
 
-        res.render(`user/tasks/${taskName}`, { clueId: clue._id, taskAnswer: clue.taskAnswer, taskName: taskName });
+        res.render(`user/tasks/${taskName}`, {
+            clueId: clue._id, taskAnswer: clue.taskAnswer, taskName: taskName, User
+        });
     } catch (error) {
         console.error("Error fetching task details:", error);
         res.status(500).send("Error fetching task details");
@@ -203,6 +206,7 @@ router.post("/task/:taskName/:id", async (req, res) => {
 
 // GET Method for Celebration Page
 router.get("/celebration", async (req, res) => {
+    let User = req.session.user;
     if (!req.session.gameCompleted) {
         return res.redirect("/"); // Redirect to home if game isn't complete
     }
@@ -216,7 +220,7 @@ router.get("/celebration", async (req, res) => {
 
     res.render("user/celebration", {
         teamName: finalResults.teamName,
-        totalTime: finalResults.totalTime
+        totalTime: finalResults.totalTime, User
     });
 
     // Clear session after rendering

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const notyf = new Notyf({
         duration: 3000,
-        position: { x: "right", y: "top" }
+        position: { x: "right", y: "bottom" }
     });
 
     // Get messages from data attributes

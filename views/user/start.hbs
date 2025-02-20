@@ -1,9 +1,9 @@
-<section>
-    <h2>{{User.Name}}, let's start the game!</h2>
-    <p id="countdown"></p>
+<section class="paper-grid-box start-box">
+    <h2 class="landingHeader">Team : <span>{{User.Name}}</span>, let's start the game!</h2>
+    <p id="countdown" class="countdown"></p>
 
     <!-- Initially hidden, only appears when the countdown ends -->
-    <a id="startGameLink" href="/clue/{{firstClue._id}}" class="btn btn-success btn-lg" style="display: none;"
+    <a id="startGameLink" href="/clue/{{firstClue._id}}" class="btn btn-success startButton" style="display: none;"
         onclick="startNavbarTimer()">
         Start the Game
     </a>

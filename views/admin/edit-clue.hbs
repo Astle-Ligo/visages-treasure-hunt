@@ -1,7 +1,7 @@
 <section>
-    <div class="container-fluid pt-5">
-        <div class="edit-product m-4">
-            <div class="add-product mt-3">
+    <div class="container-fluid">
+        <div class="edit-product">
+            <div class="add-product">
                 <h2 class="text-center">EDIT CLUE</h2>
                 <form action="/admin/edit-clue/{{clue._id}}" method="post" enctype="multipart/form-data">
                     <label for="">Clue Number</label>
@@ -19,7 +19,7 @@
                     <label for="">Task Answer</label>
                     <input type="text" name="taskAnswer" class="form-control" id="" value="{{clue.taskAnswer}}">
 
-                    <button class="btn btn-success mt-4" type="submit">Submit</button>
+                    <button class="btn btn-success" type="submit">Submit</button>
                 </form>
             </div>
         </div>

@@ -1,8 +1,15 @@
-<section>
-    <h1>Snake and Ladder</h1>
-    <form action="/task/{{taskName}}/{{clueId}}" method="POST">
-        <label for="taskAnswer">Your Answer:</label>
-        <input type="text" name="taskAnswer" id="taskAnswer" placeholder="Enter your answer" required>
-        <input type="submit" value="Submit">
-    </form>
+<section class="snake-ladder">
+    <div class="snake-ladder-left"></div>
+    <div class="snake-ladder-right">
+        <h1 class="taskHeader">Snake and Ladder</h1>
+        <p class="taskText">In a best case scenario, how many tosses are needed to reach 100?</p>
+        <form action="/task/{{taskName}}/{{clueId}}" method="POST" class="taskForm">
+            <div class="taskAnswer">
+                <label for="taskAnswer" class="taskAnswerText">Your Answer:</label>
+                <input type="text" name="taskAnswer" id="taskAnswer" placeholder="Enter your answer"
+                    class="taskAnswerBox" required>
+            </div>
+            <input type="submit" value="Submit" class="btn btn-primary sumbitButton">
+        </form>
+    </div>
 </section>

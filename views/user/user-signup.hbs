@@ -1,39 +1,39 @@
-<div class="row p-4">
-    <div class="col-md-6 m-auto p-5">
-        <div class="conatiner-fluid mt-5 pl-5">
+<section class="page">
+    <div class="paper-grid-box">
+        <div class="conatiner-fluid formContainer">
             <h2 class="text-center">Create New Account</h2>
-            <form action="/user-signup" method="post">
+            <form action="/user-signup" method="post" class="formBox">
 
                 <div class="form-group">
-                    <label for="">Team Name</label>
+                    <label for="" class="formLabel">Team Name :</label>
                     <input type="text" name="Name" class="form-control" placeholder="Enter Name" id="">
                 </div>
 
                 <div class="form-group">
-                    <label for="">College Name</label>
+                    <label for="" class="formLabel">College Name :</label>
                     <input type="text" name="collegeName" class="form-control" placeholder="Enter College Name" id="">
                 </div>
 
                 <div class="form-group">
-                    <label for="">Email Address</label>
+                    <label for="" class="formLabel">Email :</label>
                     <input type="email" name="Email" class="form-control" placeholder="Enter Email" id="">
                 </div>
 
                 <div class="form-group">
-                    <label for="">Phone Number</label>
+                    <label for="" class="formLabel">Phone :</label>
                     <input type="text" name="phoneNumber" class="form-control" placeholder="Enter Phone Number" id="">
                 </div>
 
                 <div class="form-group">
-                    <label for="">Password</label>
+                    <label for="" class="formLabel">Password :</label>
                     <input type="password" name="Password" class="form-control" placeholder="Password" id="">
                 </div>
-{{!-- 
+                {{!--
                 <input type="hidden" name="level" value="0">
                 <input type="hidden" name="timeTaken" value="0"> --}}
 
-                <button type="submit" class="btn btn-primary float-right">SignUp</button>
+                <button type="submit" class="btn btn-primary submitButton">Register</button>
             </form>
         </div>
     </div>
-</div>
+</section>
