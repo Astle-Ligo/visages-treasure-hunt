@@ -1,0 +1,25 @@
+[33m312e538[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/main
+[33m312e538[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{1}: rebase (finish): refs/heads/main onto 052e9957dbe9511cf7b63a522d304fe03d0c0072
+[33m312e538[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{2}: checkout: moving from 63bb294873abd14562cc5331fa6cce73f2df5536 to main
+[33m63bb294[m HEAD@{3}: commit: env updated
+[33m87fe1bb[m HEAD@{4}: commit: timer and css left
+[33me96f9e4[m HEAD@{5}: commit: celebration page done
+[33m18f04e0[m HEAD@{6}: commit: almost done
+[33m052e995[m HEAD@{7}: reset: moving to HEAD~1
+[33m534e617[m HEAD@{8}: rebase (continue): backend 95% done
+[33m052e995[m HEAD@{9}: pull origin main --rebase (start): checkout 052e9957dbe9511cf7b63a522d304fe03d0c0072
+[33m312e538[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{10}: commit: backend 95% done
+[33m76d2f80[m HEAD@{11}: reset: moving to 76d2f80
+[33m76d2f80[m HEAD@{12}: reset: moving to 76d2f80
+[33m052e995[m HEAD@{13}: commit: delete this
+[33m76d2f80[m HEAD@{14}: commit: clue logic fully done
+[33m8281043[m HEAD@{15}: commit: chat gpt for help
+[33mae7ac67[m HEAD@{16}: commit: small update
+[33m9b07b8d[m HEAD@{17}: commit: admin 90% done
+[33m802fa7f[m HEAD@{18}: commit: connection.js removed
+[33m90f9900[m HEAD@{19}: commit: clues part done
+[33me4c3d2a[m HEAD@{20}: commit: dashboard created
+[33m384d7e0[m HEAD@{21}: commit: ignored collection.js
+[33m84bfae6[m HEAD@{22}: commit: something started
+[33m89fcc1d[m HEAD@{23}: Branch: renamed refs/heads/master to refs/heads/main
+[33m89fcc1d[m HEAD@{25}: commit (initial): coding started
