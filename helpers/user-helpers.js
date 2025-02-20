@@ -1,7 +1,7 @@
 const db = require('../config/connection');
 const collection = require('../config/collection');
 const { ObjectId } = require('mongodb');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds < 0) return "0h 0m 0s"; // Handle invalid cases
