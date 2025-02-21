@@ -6,15 +6,20 @@ const state = { db: null };
 const mongoURI = process.env.MONGO_URI;
 const dbName = "Visages_Treasure_Hunt";
 
+// Debugging: Check if .env is loaded
+console.log("🛠 MONGO_URI from .env:", mongoURI || "❌ Not Defined");
+
 if (!mongoURI) {
-    console.error("❌ MONGO_URI is not defined.");
+    console.error("❌ MONGO_URI is not defined. Check your .env file or Render environment variables.");
     process.exit(1);
 }
 
-// ✅ Remove deprecated options
+// ✅ MongoDB Client Setup
 const client = new MongoClient(mongoURI, {
-    tls: true, // Ensures secure TLS connection
-    tlsAllowInvalidCertificates: false // Prevents invalid certificates
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true,
+    tlsAllowInvalidCertificates: false
 });
 
 const connectDb = async (done) => {
@@ -35,8 +40,7 @@ const connectDb = async (done) => {
     }
 };
 
-
-// ✅ Ensure that `db.get()` does not return null
+// Ensure that `db.get()` does not return null
 const get = () => {
     if (!state.db) {
         console.error("❌ Database not connected when calling get()");
