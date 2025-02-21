@@ -11,6 +11,16 @@ const formatTime = (seconds) => {
     const remainingSeconds = seconds % 60;
     return `${hours}h ${minutes}m ${remainingSeconds}s`;
 };
+
+const getDb = () => {
+    const database = db.get();
+    if (!database) {
+        console.error("❌ Database is null when calling db.get()");
+        throw new Error("Database connection not established");
+    }
+    return database;
+};
+
 module.exports = {
     doSignup: async (userData) => {
         userData.Password = await bcrypt.hash(userData.Password, 10);

@@ -13,6 +13,7 @@ const session = require('express-session');
 var fileUpload = require('express-fileupload');
 
 var app = express();
+const PORT = process.env.PORT || 3001; // ✅ Fix: Define PORT
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -42,7 +43,6 @@ app.use(session({
   rolling: true // Resets maxAge on each request
 }));
 
-
 // ✅ Middleware to store session messages and clear them after one request cycle
 app.use((req, res, next) => {
   res.locals.success = req.session.success || null;
@@ -59,9 +59,22 @@ app.use('/', userRouter);
 app.use('/admin', adminRouter);
 
 db.connectDb((err) => {
-  if (err) console.log("Connection Error: " + err);
-  else console.log("Connected to database.");
+  if (err) {
+    console.error("❌ Database Connection Failed:", err);
+    process.exit(1);
+  } else {
+    console.log("✅ Connected to MongoDB!");
+
+    // Ensure user routes are only used **after** DB connection
+    app.use('/', userRouter);
+    app.use('/admin', adminRouter);
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  }
 });
+
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
