@@ -1,27 +1,23 @@
-<section>
+<section class="admin-section">
     <div class="container-fluid">
-        <div class="edit-product">
-            <div class="add-product">
-                <h2 class="text-center">Add Product</h2>
-                <form action="/admin/add-clue" method="post" enctype="multipart/form-data">
-                    <label for="">Clue Number</label>
-                    <input type="number" name="clueNumber" id="" class="form-control">
+        <h2 class="text-center">Add clue</h2>
+        <form action="/admin/add-clue" method="post" enctype="multipart/form-data">
+            <label for="">Clue Number</label>
+            <input type="number" name="clueNumber" id="" class="form-control">
 
-                    <label for="">Clue</label>
-                    <textarea name="clue" id="" class="form-control" rows="3"></textarea>
+            <label for="">Clue</label>
+            <textarea name="clue" id="" class="form-control" rows="3"></textarea>
 
-                    <label for="">Answer</label>
-                    <input type="text" name="answer" class="form-control" id="">
-                    
-                    <label for="">Task Name</label>
-                    <input type="text" name="taskName" class="form-control" id="">
-                    
-                    <label for="">Task Answer</label>
-                    <input type="text" name="taskAnswer" class="form-control" id="">
+            <label for="">Answer</label>
+            <input type="text" name="answer" class="form-control" id="">
 
-                    <button class="btn btn-success" type="submit">Submit</button>
-                </form>
-            </div>
-        </div>
+            <label for="">Task Name</label>
+            <input type="text" name="taskName" class="form-control" id="">
+
+            <label for="">Task Answer</label>
+            <input type="text" name="taskAnswer" class="form-control" id="">
+
+            <button class="btn btn-success" type="submit">Submit</button>
+        </form>
     </div>
 </section>

@@ -91,7 +91,7 @@ body {
   background-size: cover;
   box-shadow: 1px 15px 20px 0px rgba(0, 0, 0, 0.5);
   width: clamp(20rem, 90%, 80rem);
-  height: clamp(15rem, 80%, 36rem);
+  height: clamp(15rem, 80%, 40rem);
   font-family: 'Zeyada';
   padding: 1.5rem;
   flex-direction: column;
@@ -141,7 +141,7 @@ body {
 .clueText {
   color: black;
   font-size: 2.1rem;
-
+  font-weight: 600;
 }
 
 .submitButton {
@@ -257,7 +257,7 @@ footer {
   align-items: center;
   justify-content: space-evenly;
   flex-direction: column;
-  height: 10rem;
+  height: 20rem;
   width: 100%;
 }
 
@@ -317,21 +317,13 @@ footer {
   width: 100%;
 }
 
-.decrpyt-left {
-  width: 25rem;
-  height: 18rem;
-  background-color: rebeccapurple;
-  font-family: serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-}
-
-.decrpyt-right {
-  width: 25rem;
-  height: 18rem;
-  background-color: aqua;
+.decrypt-img {
+  width: 30rem;
+  height: 20rem;
+  background-image: url(/images/decrypt.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .decrpytForm {
@@ -339,7 +331,6 @@ footer {
   align-items: center;
   justify-content: space-evenly;
   flex-direction: column;
-  width: 100%;
   height: 100%;
 }
 
@@ -376,4 +367,32 @@ footer {
 
 .celebrate-btn:active {
   transform: scale(0.98);
+}
+
+.admin-section {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.admin-user {
+  justify-content: space-evenly;
+}
+
+.accordion{
+  width: 90%;
+}
+
+.accordion-body>ul{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem 1rem;
+}
+
+.accordion-body>ul>li{
+  list-style: none;
 }

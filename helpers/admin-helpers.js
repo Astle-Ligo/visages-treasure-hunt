@@ -88,7 +88,7 @@ module.exports = {
             try {
                 await db.get().collection(collection.CLUE_COLLECTION).updateOne(
                     { _id: new ObjectId(clueId) },
-                    { $set: { clueNumber: clueDetails.clueNumber, clue: clueDetails.clue, answer: clueDetails.answer } }
+                    { $set: { clueNumber: clueDetails.clueNumber, clue: clueDetails.clue, answer: clueDetails.answer, taskName: clueDetails.taskName, taskAnswer: clueDetails.taskAnswer } }
                 );
                 resolve();
             } catch (error) {

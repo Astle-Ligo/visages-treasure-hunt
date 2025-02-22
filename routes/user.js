@@ -2,16 +2,14 @@ const express = require('express');
 const router = express.Router();
 const userHelpers = require('../helpers/user-helpers');
 const { ObjectId } = require('mongodb');
+const async = require('hbs/lib/async');
 
 // GET users listing
 router.get('/', async (req, res) => {
     let User = req.session.user;
     if (User) {
-        if (!req.session.startTime) {
-            req.session.startTime = Date.now(); // Store start time in session
-        }
-
-        const firstClue = await userHelpers.getFirstClue();
+        const firstClue = await userHelpers.getFirstClue(User._id);
+        console.log(firstClue);
 
         res.render('user/start', {
             User,
@@ -40,6 +38,7 @@ router.get('/user-login', (req, res) => {
     res.render('user/user-login');
 });
 
+// User login
 router.post('/user-login', async (req, res) => {
     const response = await userHelpers.doLogin(req.body);
 
@@ -51,10 +50,8 @@ router.post('/user-login', async (req, res) => {
 
         // Fetch user details and game timer from the database
         const user = await userHelpers.getUser(response.user._id);
-        const timerData = await userHelpers.getGameTimer(response.user._id);
 
-        req.session.gameStartTime = timerData.gameStartTime || null;  // Store the game start time in session
-        req.session.elapsedTime = timerData.elapsedTime || 0;         // Store the elapsed time in session
+        // Default to 0 if no elapsed time in DB
 
         if (user.currentClueId) {
             return res.redirect(`/clue/${user.currentClueId}`);
@@ -65,8 +62,6 @@ router.post('/user-login', async (req, res) => {
         return res.redirect('/user-login');
     }
 });
-
-
 
 
 // User log out
@@ -97,18 +92,29 @@ router.get("/get-timer-status", async (req, res) => {
 router.get("/clue/:id", async (req, res) => {
     console.log("Clue ID received:", req.params.id);
     let User = req.session.user;
+    const userId = req.session.user._id;
+
     try {
         const clueId = req.params.id;
+
+        // Validate clue ID
         if (!ObjectId.isValid(clueId)) {
             return res.status(400).send("Invalid clue ID");
         }
 
+        // Fetch clue details
         const clue = await userHelpers.getClue(clueId);
-
         if (!clue) {
             return res.status(404).send("Clue not found");
         }
+        console.log(req.session.startTime);
 
+        // Start the game timer and store in DB if not already done
+        if (!req.session.startTime) {
+            req.session.startTime = await userHelpers.startGameTimer(userId);  // Store start time in session
+        }
+
+        // Render the clue page
         res.render("user/clue-page", { clue, User });
     } catch (error) {
         console.error("Error retrieving clue:", error);
@@ -120,25 +126,22 @@ router.get("/clue/:id", async (req, res) => {
 router.post("/clue/:id", async (req, res) => {
     const userId = req.session.user._id;
     const clueId = req.params.id;
-    const startTime = req.session.startTime;
 
-    const result = await userHelpers.checkClueAnswer(userId, clueId, req.body.answer, startTime);
+    const gameTime = await userHelpers.getGameTimer(userId);
 
-    if (result.error) {
-        const clue = await userHelpers.getClue(clueId);
-        if (!clue) {
-            return res.status(404).send("Clue not found");
+    try {
+        // Fetch the startTime from the database directly (no session)
+        const result = await userHelpers.checkClueAnswer(userId, clueId, req.body.answer,gameTime.gameStartTime);
+
+        if (result.success) {
+            res.redirect(result.nextStep);
+        } else {
+            res.render("user/clue-page", { error: result.error, User: req.session.user });
         }
-
-        return res.render('user/clue-page', {
-            error: result.error,
-            clueId: clueId,
-            clue: clue
-        });
+    } catch (error) {
+        console.error("Error checking clue answer:", error);
+        res.status(500).send("Error checking clue answer");
     }
-
-    req.session.success = result.success; // Store success message in session
-    res.redirect(result.nextStep);
 });
 
 
@@ -176,9 +179,11 @@ router.post("/task/:taskName/:id", async (req, res) => {
     const userId = req.session.user._id;
     const clueId = req.params.id;
     const taskName = req.params.taskName;
-    const startTime = req.session.startTime;
+    
+    const gameTime = await userHelpers.getGameTimer(userId);
 
-    const result = await userHelpers.checkTaskAnswer(userId, clueId, req.body.taskAnswer, startTime);
+
+    const result = await userHelpers.checkTaskAnswer(userId, clueId, req.body.taskAnswer, gameTime.gameStartTime);
 
     if (result.error) {
         const clue = await userHelpers.getClue(clueId);
@@ -227,6 +232,9 @@ router.get("/celebration", async (req, res) => {
     req.session.gameCompleted = false;
 });
 
+router.get("/many-urls/etwyl3r2sbbxkofy", async (req, res) => {
+    res.render('user/tasks/many-urls-answer')
+})
 
 
 module.exports = router;

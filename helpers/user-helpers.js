@@ -66,6 +66,7 @@ module.exports = {
 
             const isCorrect = clue.answer.toLowerCase() === answer.toLowerCase();
             const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            console.log(Date.now(), startTime, timeTaken);
 
             await module.exports.storeUserResponse(userId, clueId, clue.clueNumber, null, answer, isCorrect, timeTaken, formatTime(timeTaken));
 
@@ -104,6 +105,8 @@ module.exports = {
 
             const isCorrect = clue.taskAnswer.toLowerCase() === taskAnswer.toLowerCase();
             const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            console.log(Date.now(), startTime, timeTaken);
+
             const formattedTime = formatTime(timeTaken);
 
             await module.exports.storeUserResponse(userId, clueId, null, clue.taskName, taskAnswer, isCorrect, timeTaken, formattedTime);
@@ -114,8 +117,7 @@ module.exports = {
                 await db.get().collection(collection.USER_COLLECTION).updateOne(
                     { _id: new ObjectId(userId) },
                     {
-                        $set: { lastCompletedClue: clue.clueNumber },
-                        $inc: { totalTimeTaken: timeTaken }
+                        $set: { lastCompletedClue: clue.clueNumber }
                     }
                 );
 
@@ -153,50 +155,48 @@ module.exports = {
     startGameTimer: async (userId) => {
         try {
             const user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
+            console.log("hai");
 
-            if (user && user.gameStartTime) {
-                return user.gameStartTime;  // Return existing start time if already started
+            // If user does not have a start time, set it
+            if (user && !user.startTime) {
+                const startTime = new Date(); // Current timestamp
+                console.log(startTime);
+
+                await db.get().collection(collection.USER_COLLECTION).updateOne(
+                    { _id: new ObjectId(userId) },
+                    { $set: { startTime: startTime } }
+                );
+                return startTime; // Return start time
+            } else {
+                return user.startTime; // If start time already exists, return it
             }
-
-            const startTime = new Date();
-            await db.get().collection(collection.USER_COLLECTION).updateOne(
-                { _id: new ObjectId(userId) },
-                { $set: { gameStartTime: startTime } }
-            );
-
-            return startTime;
         } catch (error) {
-            console.error("❌ Error in startGameTimer:", error);
-            return null;
+            console.error("Error starting game timer:", error);
+            throw new Error("Error starting the game timer.");
         }
     },
 
     // ✅ Get elapsed time (timer should continue even after logout)
     getGameTimer: async (userId) => {
         try {
-            if (!ObjectId.isValid(userId)) return { error: "Invalid user ID format" };
+            const user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(userId) });
 
-            const user = await db.get().collection(collection.USER_COLLECTION).findOne(
-                { _id: new ObjectId(userId) },
-                { projection: { gameStartTime: 1 } }
-            );
-
-            if (!user || !user.gameStartTime) {
+            if (!user || !user.startTime) {
                 return { error: "Game has not started yet." };
             }
 
-            const startTime = new Date(user.gameStartTime).getTime();
-            const currentTime = Date.now();
-            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+            const startTime = new Date(user.startTime).getTime(); // Game start time
+            const currentTime = Date.now(); // Current time
+            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000); // Elapsed time in seconds
 
             return {
-                gameStartTime: user.gameStartTime,
+                gameStartTime: user.startTime,
                 elapsedTime: elapsedSeconds,
-                formattedTime: formatTime(elapsedSeconds),
+                formattedTime: formatTime(elapsedSeconds), // Format elapsed time for display
             };
         } catch (error) {
-            console.error("❌ Error fetching game timer:", error);
-            return { error: "Failed to retrieve game timer." };
+            console.error("Error tracking game timer:", error);
+            throw new Error("There was an error tracking the game timer.");
         }
     },
 
@@ -237,7 +237,7 @@ module.exports = {
         await db.get().collection(collection.USER_COLLECTION).updateOne(
             { _id: new ObjectId(userId) },
             {
-                $inc: { totalTimeTaken: timeTaken },  // Increment total seconds
+                // Increment total seconds
                 $set: { formattedTime: formattedTime } // Store readable format
             }
         );
