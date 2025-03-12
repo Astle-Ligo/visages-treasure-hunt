@@ -149,7 +149,7 @@ module.exports = {
                     $project: {
                         _id: 1,
                         teamName: "$Name",
-                        collegeName: "$collegeName",
+                        class: "$class",
                         lastCompletedClue: {
                             $toInt: { $ifNull: [{ $toString: "$lastCompletedClue" }, "0"] }
                         },
