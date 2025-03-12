@@ -1,0 +1,19 @@
+<section class="snake-ladder-page">
+    <h1 class="taskHeader">Video Challenge</h1>
+    <div class="snake-ladder">
+        <div class="snake-ladder-left">
+            <video src="/video/sample.mp4" controls class="video"></video>
+        </div>
+        <div class="snake-ladder-right">
+            <p class="taskText">Guess the movie?</p>
+            <form action="/task/{{taskName}}/{{clueId}}" method="POST" class="taskForm">
+                <div class="taskAnswer">
+                    <label for="taskAnswer" class="taskAnswerText">Your Answer:</label>
+                    <input type="text" name="taskAnswer" id="taskAnswer" placeholder="Enter your answer"
+                        class="taskAnswerBox" required>
+                </div>
+                <input type="submit" value="Submit" class="btn btn-primary sumbitButton">
+            </form>
+        </div>
+    </div>
+</section>
